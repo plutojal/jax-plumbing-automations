@@ -18,8 +18,10 @@ Scheduled — runs on the 1st of every month at 08:00.
 ## Filter query (OData)
 
 ```
-MOTDueDate le '[Today+30]' and MOTDueDate ne null
+MOTDueDate le '@{formatDateTime(addDays(utcNow(), 30), 'yyyy-MM-dd')}' and MOTDueDate ne null
 ```
+
+**Order by:** `MOTDueDate asc`
 
 ## Email
 
@@ -37,7 +39,15 @@ MOTDueDate le '[Today+30]' and MOTDueDate ne null
 
 - [ ] Built in Power Automate
 - [ ] Tested
-- [ ] definition.json exported and committed
+- [x] definition.json template committed — replace with exported JSON after building in Power Automate
+
+## Setup notes
+
+1. Open `definition.json` and replace `https://[tenant].sharepoint.com/sites/JaxPlumbing` with your actual SharePoint site URL.
+2. Import the flow via **Power Automate → My Flows → Import → Import Package (Legacy)**.
+3. When prompted, link the two connections: **SharePoint** and **Office 365 Outlook**.
+4. Run a test manually from the flow editor and verify the email arrives.
+5. Export the live flow and replace `definition.json` with the exported JSON.
 
 ## Change log
 

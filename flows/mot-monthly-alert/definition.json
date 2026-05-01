@@ -1,10 +1,118 @@
 {
-  "_comment": "Placeholder — replace with exported flow definition from Power Automate.",
-  "_instructions": "In Power Automate: My Flows → select flow → three dots → Export → Package (.zip) → unzip → copy JSON from Microsoft.Flow/flows/ into this file.",
-  "flow_name": "mot-monthly-alert",
-  "description": "Monthly scheduled alert for vehicles with MOT due within 30 days",
-  "trigger": "Recurrence — 1st of every month at 08:00",
-  "sharepoint_list": "Vehicles",
-  "columns_used": ["Title", "Registration", "Driver", "Make", "Model", "MOTDueDate"],
-  "definition": {}
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    },
+    "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+    }
+  },
+  "triggers": {
+    "Recurrence": {
+      "recurrence": {
+        "frequency": "Month",
+        "interval": 1,
+        "schedule": {
+          "hours": ["8"],
+          "minutes": [0],
+          "monthDays": [1]
+        },
+        "startTime": "2024-01-01T08:00:00",
+        "timeZone": "GMT Standard Time"
+      },
+      "type": "Recurrence"
+    }
+  },
+  "actions": {
+    "Get_items": {
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+          "connectionName": "shared_sharepointonline",
+          "operationId": "GetItems"
+        },
+        "parameters": {
+          "dataset": "https://[tenant].sharepoint.com/sites/JaxPlumbing",
+          "table": "Vehicles",
+          "$filter": "MOTDueDate le '@{formatDateTime(addDays(utcNow(), 30), 'yyyy-MM-dd')}' and MOTDueDate ne null",
+          "$orderby": "MOTDueDate asc",
+          "$top": 999
+        }
+      },
+      "runAfter": {}
+    },
+    "Condition_-_Vehicles_due": {
+      "type": "If",
+      "expression": {
+        "greater": [
+          "@length(body('Get_items')?['value'])",
+          0
+        ]
+      },
+      "actions": {
+        "Create_HTML_table": {
+          "type": "Table",
+          "inputs": {
+            "format": "HTML",
+            "from": "@body('Get_items')?['value']",
+            "columns": [
+              {
+                "header": "Registration",
+                "value": "@item()?['Title']"
+              },
+              {
+                "header": "Driver",
+                "value": "@item()?['Driver']?['Value']"
+              },
+              {
+                "header": "Make",
+                "value": "@item()?['Make']"
+              },
+              {
+                "header": "Model",
+                "value": "@item()?['Model']"
+              },
+              {
+                "header": "MOT Due Date",
+                "value": "@{formatDateTime(item()?['MOTDueDate'], 'dd/MM/yyyy')}"
+              }
+            ]
+          },
+          "runAfter": {}
+        },
+        "Send_an_email_(V2)": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+              "connectionName": "shared_office365",
+              "operationId": "SendEmailV2"
+            },
+            "parameters": {
+              "emailMessage/To": "admin@jaxplumbing.co.uk",
+              "emailMessage/Subject": "@{concat('MOT Alert — ', string(length(body('Get_items')?['value'])), ' vehicle(s) due within 30 days')}",
+              "emailMessage/Body": "<p>The following @{string(length(body('Get_items')?['value']))} vehicle(s) have an MOT due on or before <strong>@{formatDateTime(addDays(utcNow(), 30), 'dd/MM/yyyy')}</strong>:</p>\n@{body('Create_HTML_table')}\n<p>Please ensure all MOTs are booked in advance.</p>",
+              "emailMessage/Importance": "Normal",
+              "emailMessage/IsHtml": true
+            }
+          },
+          "runAfter": {
+            "Create_HTML_table": ["Succeeded"]
+          }
+        }
+      },
+      "else": {
+        "actions": {}
+      },
+      "runAfter": {
+        "Get_items": ["Succeeded"]
+      }
+    }
+  },
+  "outputs": {}
 }
