@@ -4,21 +4,20 @@ Power Automate flow definitions and documentation for Jax Plumbing & Heating.
 
 ## Overview
 
-This repo stores all Power Automate flow definitions as version-controlled JSON. It is separate from the Power App repo ([claude_code_jax_plumbing](https://github.com/plutojal/claude_code_jax_plumbing)) which handles the frontend application.
+This repo stores all Power Automate flow definitions as version-controlled JSON. It is separate from the Power App repo ([jax-plumbing-powerapps](https://github.com/plutojal/jax-plumbing-powerapps)) which handles the frontend application.
 
 ## Repo structure
 
 ```
 jax-plumbing-automations/
-├── .github/
-│   └── workflows/
-│       └── deploy.yml              # CI/CD pipeline (ready for Power Platform CLI)
 ├── flows/
 │   ├── mot-monthly-alert/
-│   │   ├── definition.json         # Exported Power Automate flow definition
+│   │   ├── definition.json         # Flow definition
+│   │   ├── mot-monthly-alert.zip   # Ready-to-import Power Automate package
 │   │   └── README.md               # Flow documentation
 │   └── qualification-expiry-alert/
 │       ├── definition.json
+│       ├── qualification-expiry-alert.zip
 │       └── README.md
 └── README.md
 ```
@@ -115,10 +114,5 @@ Examples:
 ## How to import a flow into Power Automate
 
 1. Open Power Automate → My Flows → Import → Import Package (Legacy)
-2. Upload the ZIP — or use the Power Platform CLI (see `deploy.yml` for future automation)
-
-## Future: automated deployment
-
-The `.github/workflows/deploy.yml` file is ready to be wired up to the Power Platform CLI (`pac`). When configured, pushing to `main` will automatically deploy flow changes to the Power Automate environment without manual import.
-
-See [Microsoft Power Platform CLI docs](https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction) for setup.
+2. Download the relevant `.zip` from this repo and upload it
+3. Select your existing SharePoint and Outlook connections when prompted
