@@ -1,0 +1,74 @@
+name: Deploy Power Automate flows
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "flows/**/definition.json"
+
+jobs:
+  deploy:
+    name: Import flows to Power Platform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ---------------------------------------------------------------
+      # Authentication
+      # Add these four secrets in GitHub → Settings → Secrets → Actions:
+      #
+      #   POWERPLATFORM_TENANT_ID      — Azure AD tenant ID
+      #                                  Azure Portal → Azure Active Directory → Overview
+      #
+      #   POWERPLATFORM_CLIENT_ID      — App registration client (application) ID
+      #                                  Azure Portal → App registrations → your app → Overview
+      #
+      #   POWERPLATFORM_CLIENT_SECRET  — Client secret value
+      #                                  Azure Portal → App registrations → your app → Certificates & secrets
+      #
+      #   POWERPLATFORM_ENVIRONMENT_URL — Power Platform environment URL
+      #                                   e.g. https://yourorg.crm11.dynamics.com
+      #                                   Power Platform admin centre → Environments → your env → Settings
+      # ---------------------------------------------------------------
+      - name: Authenticate to Power Platform
+        uses: microsoft/powerplatform-actions/who-am-i@v1
+        with:
+          environment-url: ${{ secrets.POWERPLATFORM_ENVIRONMENT_URL }}
+          app-id: ${{ secrets.POWERPLATFORM_CLIENT_ID }}
+          client-secret: ${{ secrets.POWERPLATFORM_CLIENT_SECRET }}
+          tenant-id: ${{ secrets.POWERPLATFORM_TENANT_ID }}
+
+      # ---------------------------------------------------------------
+      # Import flows
+      # Each flow is imported individually via the Power Platform CLI.
+      # The --skip-connection-check flag lets the import succeed even when
+      # SharePoint / Outlook connections haven't been re-linked yet — you
+      # still need to open each flow in Power Automate and link them once.
+      # ---------------------------------------------------------------
+      - name: Install Power Platform CLI
+        run: |
+          dotnet tool install --global Microsoft.PowerApps.CLI.Tool
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Import mot-monthly-alert
+        run: |
+          pac auth create \
+            --url "${{ secrets.POWERPLATFORM_ENVIRONMENT_URL }}" \
+            --applicationId "${{ secrets.POWERPLATFORM_CLIENT_ID }}" \
+            --clientSecret "${{ secrets.POWERPLATFORM_CLIENT_SECRET }}" \
+            --tenant "${{ secrets.POWERPLATFORM_TENANT_ID }}"
+
+          pac flow import \
+            --environment "${{ secrets.POWERPLATFORM_ENVIRONMENT_URL }}" \
+            --path flows/mot-monthly-alert/definition.json \
+            --skip-connection-check
+
+      - name: Import qualification-expiry-alert
+        run: |
+          pac flow import \
+            --environment "${{ secrets.POWERPLATFORM_ENVIRONMENT_URL }}" \
+            --path flows/qualification-expiry-alert/definition.json \
+            --skip-connection-check
