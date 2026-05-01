@@ -97,8 +97,7 @@
               "emailMessage/To": "admin@jaxplumbing.co.uk",
               "emailMessage/Subject": "@{concat('MOT Alert — ', string(length(body('Get_items')?['value'])), ' vehicle(s) due within 30 days')}",
               "emailMessage/Body": "<p>The following @{string(length(body('Get_items')?['value']))} vehicle(s) have an MOT due on or before <strong>@{formatDateTime(addDays(utcNow(), 30), 'dd/MM/yyyy')}</strong>:</p>\n@{body('Create_HTML_table')}\n<p>Please ensure all MOTs are booked in advance.</p>",
-              "emailMessage/Importance": "Normal",
-              "emailMessage/IsHtml": true
+              "emailMessage/Importance": "Normal"
             }
           },
           "runAfter": {
