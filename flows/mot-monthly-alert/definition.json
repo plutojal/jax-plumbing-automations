@@ -39,7 +39,7 @@
         "parameters": {
           "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live",
           "table": "Vehicles",
-          "$filter": "MOTDueDate le '@{formatDateTime(addDays(utcNow(), 30), 'yyyy-MM-dd')}' and MOTDueDate ne null",
+          "$filter": "MOTDueDate le '@{formatDateTime(addDays(utcNow(), 60), 'yyyy-MM-dd')}' and MOTDueDate ne null",
           "$orderby": "MOTDueDate asc",
           "$top": 999
         }
@@ -79,9 +79,9 @@
               "operationId": "SendEmailV2"
             },
             "parameters": {
-              "emailMessage/To": "data@jaxplumbing.co.uk",
-              "emailMessage/Subject": "@{concat('MOT Alert — ', string(length(body('Get_Items_-_Vehicles_MOT_Due')?['value'])), ' vehicle(s) due within 30 days')}",
-              "emailMessage/Body": "<p>The following @{string(length(body('Get_Items_-_Vehicles_MOT_Due')?['value']))} vehicle(s) have an MOT due on or before <strong>@{formatDateTime(addDays(utcNow(), 30), 'dd/MM/yyyy')}</strong>:</p>\n@{body('Create_Table_-_MOT_Summary')}\n<p>Please ensure all MOTs are booked in advance.</p>",
+              "emailMessage/To": "jack@jaxplumbing.co.uk;charlotte@jaxplumbing.co.uk;emma@jaxplumbing.co.uk",
+              "emailMessage/Subject": "@{concat('MOT Due Alert — ', string(length(body('Get_Items_-_Vehicles_MOT_Due')?['value'])), ' vehicle(s) due within the next 2 months')}",
+              "emailMessage/Body": "<p>Dear all,</p><p>Please find below a summary of vehicles with an MOT due on or before <strong>@{formatDateTime(addDays(utcNow(), 60), 'dd/MM/yyyy')}</strong>. Could you kindly ensure the relevant bookings are arranged at your earliest convenience.</p>@{body('Create_Table_-_MOT_Summary')}<p>Many thanks,<br>Jax Plumbing &amp; Heating</p>",
               "emailMessage/Importance": "Normal"
             }
           },
