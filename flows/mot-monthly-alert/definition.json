@@ -1,0 +1,10 @@
+{
+  "_comment": "Placeholder — replace with exported flow definition from Power Automate.",
+  "_instructions": "In Power Automate: My Flows → select flow → three dots → Export → Package (.zip) → unzip → copy JSON from Microsoft.Flow/flows/ into this file.",
+  "flow_name": "mot-monthly-alert",
+  "description": "Monthly scheduled alert for vehicles with MOT due within 30 days",
+  "trigger": "Recurrence — 1st of every month at 08:00",
+  "sharepoint_list": "Vehicles",
+  "columns_used": ["Title", "Registration", "Driver", "Make", "Model", "MOTDueDate"],
+  "definition": {}
+}
