@@ -13,7 +13,7 @@ Jax Plumbing & Heating are building a SharePoint-based system to manage:
 - Automated email alerts via Power Automate
 
 This repo (`jax-plumbing-automations`) stores Power Automate flow definitions.
-The Power App frontend lives in a separate repo: https://github.com/plutojal/claude_code_jax_plumbing
+The Power App frontend lives in a separate repo: https://github.com/plutojal/jax-plumbing-powerapps
 
 ---
 
