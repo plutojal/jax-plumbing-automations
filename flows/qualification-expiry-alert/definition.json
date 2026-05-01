@@ -1,10 +1,142 @@
 {
-  "_comment": "Placeholder — replace with exported flow definition from Power Automate.",
-  "_instructions": "In Power Automate: My Flows → select flow → three dots → Export → Package (.zip) → unzip → copy JSON from Microsoft.Flow/flows/ into this file.",
-  "flow_name": "qualification-expiry-alert",
-  "description": "Monthly scheduled alert for staff qualifications expiring within 30 days",
-  "trigger": "Recurrence — 1st of every month at 08:00",
-  "sharepoint_list": "Qualification Records",
-  "columns_used": ["Title", "Staff", "QualificationName", "ExpiryDate", "CertificateLink"],
-  "definition": {}
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$connections": { "defaultValue": {}, "type": "Object" },
+    "$authentication": { "defaultValue": {}, "type": "SecureObject" }
+  },
+  "triggers": {
+    "Recurrence": {
+      "recurrence": {
+        "frequency": "Month",
+        "interval": 1,
+        "schedule": { "hours": ["8"], "minutes": [0], "monthDays": [1] },
+        "startTime": "2024-01-01T08:00:00",
+        "timeZone": "GMT Standard Time"
+      },
+      "type": "Recurrence"
+    }
+  },
+  "actions": {
+    "Get_Items_-_Qualifications_Expiring": {
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+          "connectionName": "shared_sharepointonline",
+          "operationId": "GetItems"
+        },
+        "parameters": {
+          "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live",
+          "table": "Qualification Records",
+          "$filter": "ExpiryDate le '@{formatDateTime(addDays(utcNow(), 120), 'yyyy-MM-dd')}' and ExpiryDate ne null",
+          "$orderby": "ExpiryDate asc",
+          "$top": 999
+        }
+      },
+      "runAfter": {}
+    },
+    "Filter_Array_-_Urgent": {
+      "type": "Query",
+      "inputs": {
+        "from": "@body('Get_Items_-_Qualifications_Expiring')?['value']",
+        "where": "@lessOrEquals(item()?['ExpiryDate'], addDays(utcNow(), 30))"
+      },
+      "runAfter": { "Get_Items_-_Qualifications_Expiring": ["Succeeded"] }
+    },
+    "Filter_Array_-_Due_Soon": {
+      "type": "Query",
+      "inputs": {
+        "from": "@body('Get_Items_-_Qualifications_Expiring')?['value']",
+        "where": "@and(greater(item()?['ExpiryDate'], addDays(utcNow(), 30)), lessOrEquals(item()?['ExpiryDate'], addDays(utcNow(), 60)))"
+      },
+      "runAfter": { "Get_Items_-_Qualifications_Expiring": ["Succeeded"] }
+    },
+    "Filter_Array_-_Upcoming": {
+      "type": "Query",
+      "inputs": {
+        "from": "@body('Get_Items_-_Qualifications_Expiring')?['value']",
+        "where": "@and(greater(item()?['ExpiryDate'], addDays(utcNow(), 60)), lessOrEquals(item()?['ExpiryDate'], addDays(utcNow(), 120)))"
+      },
+      "runAfter": { "Get_Items_-_Qualifications_Expiring": ["Succeeded"] }
+    },
+    "Condition_-_Any_Expiring": {
+      "type": "If",
+      "expression": {
+        "greater": [
+          "@add(length(body('Filter_Array_-_Urgent')), add(length(body('Filter_Array_-_Due_Soon')), length(body('Filter_Array_-_Upcoming'))))",
+          0
+        ]
+      },
+      "runAfter": {
+        "Filter_Array_-_Urgent": ["Succeeded"],
+        "Filter_Array_-_Due_Soon": ["Succeeded"],
+        "Filter_Array_-_Upcoming": ["Succeeded"]
+      },
+      "actions": {
+        "Create_Table_-_Urgent": {
+          "type": "Table",
+          "inputs": {
+            "format": "HTML",
+            "from": "@body('Filter_Array_-_Urgent')",
+            "columns": [
+              { "header": "Staff", "value": "@item()?['Staff']?['Value']" },
+              { "header": "Qualification", "value": "@item()?['QualificationName']?['Value']" },
+              { "header": "Expiry Date", "value": "@{formatDateTime(item()?['ExpiryDate'], 'dd/MM/yyyy')}" }
+            ]
+          },
+          "runAfter": {}
+        },
+        "Create_Table_-_Due_Soon": {
+          "type": "Table",
+          "inputs": {
+            "format": "HTML",
+            "from": "@body('Filter_Array_-_Due_Soon')",
+            "columns": [
+              { "header": "Staff", "value": "@item()?['Staff']?['Value']" },
+              { "header": "Qualification", "value": "@item()?['QualificationName']?['Value']" },
+              { "header": "Expiry Date", "value": "@{formatDateTime(item()?['ExpiryDate'], 'dd/MM/yyyy')}" }
+            ]
+          },
+          "runAfter": {}
+        },
+        "Create_Table_-_Upcoming": {
+          "type": "Table",
+          "inputs": {
+            "format": "HTML",
+            "from": "@body('Filter_Array_-_Upcoming')",
+            "columns": [
+              { "header": "Staff", "value": "@item()?['Staff']?['Value']" },
+              { "header": "Qualification", "value": "@item()?['QualificationName']?['Value']" },
+              { "header": "Expiry Date", "value": "@{formatDateTime(item()?['ExpiryDate'], 'dd/MM/yyyy')}" }
+            ]
+          },
+          "runAfter": {}
+        },
+        "Send_Email_-_Qualification_Expiry_Alert": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+              "connectionName": "shared_office365",
+              "operationId": "SendEmailV2"
+            },
+            "parameters": {
+              "emailMessage/To": "jack@jaxplumbing.co.uk;charlotte@jaxplumbing.co.uk;emma@jaxplumbing.co.uk",
+              "emailMessage/Subject": "@{concat('Qualification Expiry Alert — ', string(add(length(body('Filter_Array_-_Urgent')), add(length(body('Filter_Array_-_Due_Soon')), length(body('Filter_Array_-_Upcoming'))))), ' qualification(s) expiring in the next 4 months')}",
+              "emailMessage/Body": "<p>Hi all,</p><p>Here is a summary of qualifications expiring over the next 4 months.</p><h3 style=\"color:#cc0000;\">&#9888; Urgent &mdash; Expiring Within 30 Days (@{string(length(body('Filter_Array_-_Urgent')))})</h3>@{body('Create_Table_-_Urgent')}<h3 style=\"color:#e65c00;\">Due Soon &mdash; Expiring in 1&ndash;2 Months (@{string(length(body('Filter_Array_-_Due_Soon')))})</h3>@{body('Create_Table_-_Due_Soon')}<h3 style=\"color:#2d7a2d;\">Upcoming &mdash; Expiring in 2&ndash;4 Months (@{string(length(body('Filter_Array_-_Upcoming')))})</h3>@{body('Create_Table_-_Upcoming')}<p>Thanks,<br>Jax Plumbing &amp; Heating</p>",
+              "emailMessage/Importance": "Normal"
+            }
+          },
+          "runAfter": {
+            "Create_Table_-_Urgent": ["Succeeded"],
+            "Create_Table_-_Due_Soon": ["Succeeded"],
+            "Create_Table_-_Upcoming": ["Succeeded"]
+          }
+        }
+      },
+      "else": { "actions": {} }
+    }
+  },
+  "outputs": {}
 }
