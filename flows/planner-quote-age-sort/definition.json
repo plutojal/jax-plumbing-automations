@@ -1,0 +1,517 @@
+{
+  "name": "98bc03a2-bb3c-49c0-bac4-8e6ff4336fe2",
+  "id": "/providers/Microsoft.Flow/flows/98bc03a2-bb3c-49c0-bac4-8e6ff4336fe2",
+  "type": "Microsoft.Flow/flows",
+  "properties": {
+    "apiId": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
+    "displayName": "Daily: Auto-Sort Quote Tasks by Age",
+    "definition": {
+      "metadata": {
+        "workflowEntityId": null,
+        "processAdvisorMetadata": null,
+        "flowChargedByPaygo": null,
+        "flowclientsuspensionreason": "None",
+        "flowclientsuspensiontime": null,
+        "flowclientsuspensionreasondetails": null,
+        "creator": {
+          "id": "ea6084ed-2269-4394-a203-aa503838cc1a",
+          "type": "User",
+          "tenantId": "c1b72927-c03c-48d4-a0d8-47723c2ad1cd"
+        },
+        "provisioningMethod": "FromDefinition",
+        "failureAlertSubscription": true,
+        "clientLastModifiedTime": "2026-03-05T11:37:13.4197946Z",
+        "connectionKeySavedTimeKey": "2026-05-21T03:11:02.2234256Z",
+        "creationSource": null
+      },
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "startTime": "2025-09-04T01:00:00.000Z"
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "startTime": "2025-09-04T01:00:00.000Z"
+          },
+          "metadata": {
+            "operationMetadataId": "0eb9dcbb-06af-4c12-93cb-4e1149d63379"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "List_Tasks_-_Quotes_Planner": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "9798bf40-6908-4e51-b5b0-187ebd64cf55"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListTasks_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "X0UloyezF0uAciITaNPmDJgACX-F"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Filter_Array_-_Quotes_Planner_-_Quote_Sent_Bucket": {
+          "runAfter": {
+            "List_Tasks_-_Quotes_Planner": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "cf837de2-adf3-4211-80e0-7215d2948621"
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_Quotes_Planner')?['body/value']",
+            "where": "@contains(item()?['bucketId'], 'TsBqycM-ZUmrOWpCnaOLzJgAEtnB')"
+          }
+        },
+        "Filter_Array_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket": {
+          "runAfter": {
+            "Apply_to_Each_-_Quotes_Planner_-_Quote_Sent_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4ae47a09-8b6a-4e64-97cc-19b88f1e489b"
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_Quotes_Planner')?['body/value']",
+            "where": "@equals(item()?['bucketId'], 'LC9GSidBn0Srn_qT-yz3FZgAEuQZ')"
+          }
+        },
+        "Filter_Array_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket": {
+          "runAfter": {
+            "Apply_to_Each_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "73152403-9434-44e1-b78b-625d0359fa70"
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_Quotes_Planner')?['body/value']",
+            "where": "@equals(item()?['bucketId'], 'nWK8zxDc6EKMObN6K9UzUJgACS8Y')"
+          }
+        },
+        "Filter_Array_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket": {
+          "runAfter": {
+            "Apply_to_Each_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "db24f408-efb8-4296-879f-6a58a9d534e6"
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_Quotes_Planner')?['body/value']",
+            "where": "@equals(item()?['bucketId'], 'HbCiwNHWLUm1NMU5JDbBrJgAIzyE')"
+          }
+        },
+        "Filter_Array_-_Quotes_Planner_-_Quote_Over_40_Days_Bucket": {
+          "runAfter": {
+            "Apply_to_Each_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ed6c6868-a097-4862-87ff-e469e22dfdcb"
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_Quotes_Planner')?['body/value']",
+            "where": "@equals(item()?['bucketId'], 'BoorymTYSEW6OQbyMewRAJgADVAP')"
+          }
+        },
+        "Apply_to_Each_-_Quotes_Planner_-_Quote_Sent_Bucket": {
+          "foreach": "@body('Filter_Array_-_Quotes_Planner_-_Quote_Sent_Bucket')",
+          "actions": {
+            "Get_a_Task_-_Quotes_Planner_-_Quote_Sent_Bucket": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "ca93bf9e-e509-42f3-a88d-56fd1238a691"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared_planner",
+                  "operationId": "GetTask_V2"
+                },
+                "parameters": {
+                  "id": "@items('Apply_to_Each_-_Quotes_Planner_-_Quote_Sent_Bucket')?['id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Condition_-_Quote_Age_Over_7_Days_-_Quotes_Planner_-_Quote_Sent_Bucket": {
+              "actions": {
+                "Update_a_Task_-_Quotes_Planner_-_Quote_Sent_Bucket": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "3ea5f7c1-a717-4a10-b680-ad81ffa7401d"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared_planner",
+                      "operationId": "UpdateTask_V3"
+                    },
+                    "parameters": {
+                      "id": "@outputs('Get_a_Task_-_Quotes_Planner_-_Quote_Sent_Bucket')?['body/id']",
+                      "body/bucketId": "LC9GSidBn0Srn_qT-yz3FZgAEuQZ"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_a_Task_-_Quotes_Planner_-_Quote_Sent_Bucket": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "less": [
+                  "@outputs('Get_a_Task_-_Quotes_Planner_-_Quote_Sent_Bucket')?['body/startDateTime']",
+                  "@addDays(utcNow(), -7)"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3b5a6283-645b-40a3-ad03-c27d63b5922b"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Filter_Array_-_Quotes_Planner_-_Quote_Sent_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a9fd9b0a-d934-439c-9247-77f4da015400"
+          },
+          "type": "Foreach"
+        },
+        "Apply_to_Each_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket": {
+          "foreach": "@body('Filter_Array_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket')",
+          "actions": {
+            "Get_a_Task_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "56225fe7-9822-4f23-811d-41fe62ff7f77"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared_planner",
+                  "operationId": "GetTask_V2"
+                },
+                "parameters": {
+                  "id": "@items('Apply_to_Each_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket')?['id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Condition_-_Quote_Age_Over_14_Days_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket": {
+              "actions": {
+                "Update_a_Task_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "b2fa3cec-9515-49d9-aca2-1f942c268e2f"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared_planner",
+                      "operationId": "UpdateTask_V3"
+                    },
+                    "parameters": {
+                      "id": "@outputs('Get_a_Task_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket')?['body/id']",
+                      "body/bucketId": "nWK8zxDc6EKMObN6K9UzUJgACS8Y"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_a_Task_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "less": [
+                  "@outputs('Get_a_Task_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket')?['body/startDateTime']",
+                  "@addDays(utcNow(), -14)"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "47b18b80-9551-4335-bb73-73216f278788"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Filter_Array_-_Quotes_Planner_-_Quote_Over_7_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "9018749e-22a1-4c24-b755-6b5059b13f61"
+          },
+          "type": "Foreach"
+        },
+        "Apply_to_Each_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket": {
+          "foreach": "@body('Filter_Array_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket')",
+          "actions": {
+            "Get_a_Task_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "ab9cdeaa-7e40-4398-9330-98ae5d7d61f4"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared_planner",
+                  "operationId": "GetTask_V2"
+                },
+                "parameters": {
+                  "id": "@items('Apply_to_Each_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket')?['id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Condition_-_Quote_Age_Over_28_Days_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket": {
+              "actions": {
+                "Update_a_Task_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "b2aad9eb-4960-4e9e-a73f-b84e4b313e20"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared_planner",
+                      "operationId": "UpdateTask_V3"
+                    },
+                    "parameters": {
+                      "id": "@outputs('Get_a_Task_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket')?['body/id']",
+                      "body/bucketId": "HbCiwNHWLUm1NMU5JDbBrJgAIzyE"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_a_Task_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "less": [
+                  "@outputs('Get_a_Task_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket')?['body/startDateTime']",
+                  "@addDays(utcNow(), -28)"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "d799c603-c307-4153-96d5-ff4bb368ba82"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Filter_Array_-_Quotes_Planner_-_Quote_Over_14_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "625f05b9-ea64-4036-8edc-00d62bb44f5b"
+          },
+          "type": "Foreach"
+        },
+        "Apply_to_Each_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket": {
+          "foreach": "@body('Filter_Array_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket')",
+          "actions": {
+            "Get_a_Task_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "0d61899c-dc7c-4a3e-9029-6e5693ff1836"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared_planner",
+                  "operationId": "GetTask_V2"
+                },
+                "parameters": {
+                  "id": "@items('Apply_to_Each_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket')?['id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Condition_-_Quote_Age_Over_40_Days_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket": {
+              "actions": {
+                "Update_a_Task_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "801350fc-b4c0-460b-ba96-d1cf22f46e13"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared_planner",
+                      "operationId": "UpdateTask_V3"
+                    },
+                    "parameters": {
+                      "id": "@outputs('Get_a_Task_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket')?['body/id']",
+                      "body/bucketId": "BoorymTYSEW6OQbyMewRAJgADVAP"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_a_Task_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "less": [
+                  "@outputs('Get_a_Task_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket')?['body/startDateTime']",
+                  "@addDays(utcNow(), -40)"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "c9870ac8-8720-48fa-93cc-8a4a4a7f5645"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Filter_Array_-_Quotes_Planner_-_Quote_Over_28_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "b36f2b26-79b2-4a64-853c-2dab026e7381"
+          },
+          "type": "Foreach"
+        },
+        "Apply_to_Each_-_Quotes_Planner_-_Quote_Over_40_Days_Bucket": {
+          "foreach": "@body('Filter_Array_-_Quotes_Planner_-_Quote_Over_40_Days_Bucket')",
+          "actions": {
+            "Get_a_Task_-_Quotes_Planner_-_Quote_Over_40_Days_Bucket": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "e713ff5c-d9e1-4327-9a12-57b10c92905a"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared_planner",
+                  "operationId": "GetTask_V2"
+                },
+                "parameters": {
+                  "id": "@items('Apply_to_Each_-_Quotes_Planner_-_Quote_Over_40_Days_Bucket')?['id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Condition_-_Quote_Age_Over_80_Days_-_Quotes_Planner_-_Quote_Over_40_Days_Bucket": {
+              "actions": {
+                "Update_a_Task_-_Quotes_Planner_-_Quote_Over_40_Days_Bucket": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "dcefe9ee-ab0b-4d17-8837-b183c44fdf6c"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared_planner",
+                      "operationId": "UpdateTask_V3"
+                    },
+                    "parameters": {
+                      "id": "@outputs('Get_a_Task_-_Quotes_Planner_-_Quote_Over_40_Days_Bucket')?['body/id']",
+                      "body/bucketId": "T6lBEZ_UHUWafN-Wx2g_NZgABn7i"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_a_Task_-_Quotes_Planner_-_Quote_Over_40_Days_Bucket": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "less": [
+                  "@outputs('Get_a_Task_-_Quotes_Planner_-_Quote_Over_40_Days_Bucket')?['body/startDateTime']",
+                  "@addDays(utcNow(), -80)"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "e53aeb91-f3ee-4c16-a59d-d7f9354df875"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Filter_Array_-_Quotes_Planner_-_Quote_Over_40_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4a6796b8-fa2a-4bbe-8e69-80535793b42b"
+          },
+          "type": "Foreach"
+        }
+      }
+    },
+    "connectionReferences": {
+      "shared_planner": {
+        "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_planner",
+        "tier": "NotSpecified",
+        "apiName": "planner",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      }
+    },
+    "flowFailureAlertSubscribed": false,
+    "isManaged": false
+  }
+}
