@@ -23,9 +23,8 @@ Age thresholds are calculated from `startDateTime` (the date the quote was sent)
 |---|---|
 | Plan | Directors Hub CRM Project Quotes |
 | Plan ID | `RFTf3QT3DkiAD6Hp-YqycpgAHw_2` |
+| Group | Jax Plumbing Directors Hub |
 | Group ID | `f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b` |
-
-> **Note:** Verify the Group ID matches the Directors Hub CRM team before importing. If the flow fails to list tasks, update the `groupId` parameter in `List_Tasks_-_CRM_Project_Quotes_Planner` to the correct value.
 
 ## Buckets
 
