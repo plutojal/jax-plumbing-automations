@@ -63,14 +63,15 @@
           "type": "OpenApiConnection",
           "inputs": {
             "host": {
-              "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
-              "operationId": "ListTasks_V3",
-              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner"
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListTasks_V3"
             },
             "parameters": {
               "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
               "id": "RFTf3QT3DkiAD6Hp-YqycpgAHw_2"
-            }
+            },
+            "authentication": "@parameters('$authentication')"
           }
         },
         "Filter_Array_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": {
@@ -99,13 +100,14 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "host": {
-                  "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
-                  "operationId": "GetTask_V2",
-                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner"
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared_planner",
+                  "operationId": "GetTask_V2"
                 },
                 "parameters": {
                   "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket')?['id']"
-                }
+                },
+                "authentication": "@parameters('$authentication')"
               }
             },
             "Condition_-_Quote_Age_Over_14_Days_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": {
@@ -118,14 +120,15 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "host": {
-                      "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
-                      "operationId": "UpdateTask_V3",
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner"
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared_planner",
+                      "operationId": "UpdateTask_V3"
                     },
                     "parameters": {
                       "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket')?['body/id']",
                       "body/bucketId": "WkRv-MjVzEeUPflyQgsX6pgAFkbs"
-                    }
+                    },
+                    "authentication": "@parameters('$authentication')"
                   }
                 }
               },
@@ -182,13 +185,14 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "host": {
-                  "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
-                  "operationId": "GetTask_V2",
-                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner"
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared_planner",
+                  "operationId": "GetTask_V2"
                 },
                 "parameters": {
                   "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket')?['id']"
-                }
+                },
+                "authentication": "@parameters('$authentication')"
               }
             },
             "Condition_-_Quote_Age_Over_30_Days_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": {
@@ -201,14 +205,15 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "host": {
-                      "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
-                      "operationId": "UpdateTask_V3",
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner"
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared_planner",
+                      "operationId": "UpdateTask_V3"
                     },
                     "parameters": {
                       "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket')?['body/id']",
                       "body/bucketId": "XNUKh98aTEKqFUyPRvShpJgAEpm6"
-                    }
+                    },
+                    "authentication": "@parameters('$authentication')"
                   }
                 }
               },
@@ -265,13 +270,14 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "host": {
-                  "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
-                  "operationId": "GetTask_V2",
-                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner"
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared_planner",
+                  "operationId": "GetTask_V2"
                 },
                 "parameters": {
                   "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket')?['id']"
-                }
+                },
+                "authentication": "@parameters('$authentication')"
               }
             },
             "Condition_-_Quote_Age_Over_60_Days_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": {
@@ -284,14 +290,15 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "host": {
-                      "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
-                      "operationId": "UpdateTask_V3",
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner"
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared_planner",
+                      "operationId": "UpdateTask_V3"
                     },
                     "parameters": {
                       "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket')?['body/id']",
                       "body/bucketId": "iTd4wOa9Gk-rraBOzsdccJgAIhjK"
-                    }
+                    },
+                    "authentication": "@parameters('$authentication')"
                   }
                 }
               },
@@ -348,13 +355,14 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "host": {
-                  "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
-                  "operationId": "GetTask_V2",
-                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner"
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared_planner",
+                  "operationId": "GetTask_V2"
                 },
                 "parameters": {
                   "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket')?['id']"
-                }
+                },
+                "authentication": "@parameters('$authentication')"
               }
             },
             "Condition_-_Quote_Age_Over_90_Days_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket": {
@@ -367,14 +375,15 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "host": {
-                      "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
-                      "operationId": "UpdateTask_V3",
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner"
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared_planner",
+                      "operationId": "UpdateTask_V3"
                     },
                     "parameters": {
                       "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket')?['body/id']",
                       "body/bucketId": "qA2LftY32EGGeRVkxGdolJgAFvEr"
-                    }
+                    },
+                    "authentication": "@parameters('$authentication')"
                   }
                 }
               },
