@@ -63,8 +63,7 @@
           "type": "OpenApiConnection",
           "inputs": {
             "host": {
-              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
-              "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+              "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
               "operationId": "ListTasks_V3"
             },
             "parameters": {
@@ -99,8 +98,7 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "host": {
-                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
-                  "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                  "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
                   "operationId": "GetTask_V2"
                 },
                 "parameters": {
@@ -118,8 +116,7 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
-                      "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                      "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
                       "operationId": "UpdateTask_V3"
                     },
                     "parameters": {
@@ -182,8 +179,7 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "host": {
-                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
-                  "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                  "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
                   "operationId": "GetTask_V2"
                 },
                 "parameters": {
@@ -201,8 +197,7 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
-                      "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                      "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
                       "operationId": "UpdateTask_V3"
                     },
                     "parameters": {
@@ -265,8 +260,7 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "host": {
-                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
-                  "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                  "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
                   "operationId": "GetTask_V2"
                 },
                 "parameters": {
@@ -284,8 +278,7 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
-                      "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                      "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
                       "operationId": "UpdateTask_V3"
                     },
                     "parameters": {
@@ -348,8 +341,7 @@
               "type": "OpenApiConnection",
               "inputs": {
                 "host": {
-                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
-                  "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                  "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
                   "operationId": "GetTask_V2"
                 },
                 "parameters": {
@@ -367,8 +359,7 @@
                   "type": "OpenApiConnection",
                   "inputs": {
                     "host": {
-                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
-                      "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                      "connectionReferenceName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
                       "operationId": "UpdateTask_V3"
                     },
                     "parameters": {
