@@ -1,0 +1,432 @@
+{
+  "name": "3e97db63-b99c-5997-ab13-09e08f904b27",
+  "id": "/providers/Microsoft.Flow/flows/3e97db63-b99c-5997-ab13-09e08f904b27",
+  "type": "Microsoft.Flow/flows",
+  "properties": {
+    "apiId": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
+    "displayName": "Daily: Auto-Sort CRM Project Quote Tasks by Age",
+    "definition": {
+      "metadata": {
+        "workflowEntityId": null,
+        "processAdvisorMetadata": null,
+        "flowChargedByPaygo": null,
+        "flowclientsuspensionreason": "None",
+        "flowclientsuspensiontime": null,
+        "flowclientsuspensionreasondetails": null,
+        "creator": {
+          "id": "ea6084ed-2269-4394-a203-aa503838cc1a",
+          "type": "User",
+          "tenantId": "c1b72927-c03c-48d4-a0d8-47723c2ad1cd"
+        },
+        "provisioningMethod": "FromDefinition",
+        "failureAlertSubscription": true,
+        "clientLastModifiedTime": "2026-06-02T11:00:00.0000000Z",
+        "connectionKeySavedTimeKey": "2026-06-02T11:00:00.0000000Z",
+        "creationSource": null
+      },
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "startTime": "2025-09-04T01:00:00.000Z"
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Day",
+            "interval": 1,
+            "startTime": "2025-09-04T01:00:00.000Z"
+          },
+          "metadata": {
+            "operationMetadataId": "fa935ac0-0924-5db5-baa7-a68ec7cbb158"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "List_Tasks_-_CRM_Project_Quotes_Planner": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "ea28bfa8-6f53-5e51-98e7-1da98665e836"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+              "operationId": "ListTasks_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "RFTf3QT3DkiAD6Hp-YqycpgAHw_2"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Filter_Array_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": {
+          "runAfter": {
+            "List_Tasks_-_CRM_Project_Quotes_Planner": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "0532c334-06cf-518f-bead-da728278283b"
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_CRM_Project_Quotes_Planner')?['body/value']",
+            "where": "@equals(item()?['bucketId'], 'OIqBxrQSHEOFqklRn_ToQpgAP9Eh')"
+          }
+        },
+        "Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": {
+          "foreach": "@body('Filter_Array_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket')",
+          "actions": {
+            "Get_a_Task_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "fa73e282-2b80-5bc1-850f-991b09f6867c"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                  "operationId": "GetTask_V2"
+                },
+                "parameters": {
+                  "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket')?['id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Condition_-_Quote_Age_Over_14_Days_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": {
+              "actions": {
+                "Update_a_Task_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "f43e3df7-d077-5669-a60e-99030a9cdfa9"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                      "operationId": "UpdateTask_V3"
+                    },
+                    "parameters": {
+                      "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket')?['body/id']",
+                      "body/bucketId": "WkRv-MjVzEeUPflyQgsX6pgAFkbs"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_a_Task_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "less": [
+                  "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket')?['body/startDateTime']",
+                  "@addDays(utcNow(), -14)"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3130abe9-63c3-5822-af62-8d2f129a937f"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Filter_Array_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d85a012d-7bb6-5f32-a9c8-805c772720f8"
+          },
+          "type": "Foreach"
+        },
+        "Filter_Array_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": {
+          "runAfter": {
+            "Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "8da66cbb-7ea4-5ce5-b40f-b1fd35412448"
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_CRM_Project_Quotes_Planner')?['body/value']",
+            "where": "@equals(item()?['bucketId'], 'WkRv-MjVzEeUPflyQgsX6pgAFkbs')"
+          }
+        },
+        "Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": {
+          "foreach": "@body('Filter_Array_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket')",
+          "actions": {
+            "Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "71685a1d-b545-5d24-9e6d-e177cb581204"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                  "operationId": "GetTask_V2"
+                },
+                "parameters": {
+                  "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket')?['id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Condition_-_Quote_Age_Over_30_Days_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": {
+              "actions": {
+                "Update_a_Task_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "44018e11-fa86-5541-9176-e6b308dbfbd7"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                      "operationId": "UpdateTask_V3"
+                    },
+                    "parameters": {
+                      "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket')?['body/id']",
+                      "body/bucketId": "XNUKh98aTEKqFUyPRvShpJgAEpm6"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "less": [
+                  "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket')?['body/startDateTime']",
+                  "@addDays(utcNow(), -30)"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "eb919bca-efcd-54e9-a351-7b520126eb2c"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Filter_Array_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4b788e65-3d08-5490-a307-e7f1557a7c3b"
+          },
+          "type": "Foreach"
+        },
+        "Filter_Array_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": {
+          "runAfter": {
+            "Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "098850f4-f2a9-5a85-b7e2-b2ab1531c4b3"
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_CRM_Project_Quotes_Planner')?['body/value']",
+            "where": "@equals(item()?['bucketId'], 'XNUKh98aTEKqFUyPRvShpJgAEpm6')"
+          }
+        },
+        "Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": {
+          "foreach": "@body('Filter_Array_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket')",
+          "actions": {
+            "Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "6baf6e31-5434-5752-9668-75b49c86617f"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                  "operationId": "GetTask_V2"
+                },
+                "parameters": {
+                  "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket')?['id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Condition_-_Quote_Age_Over_60_Days_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": {
+              "actions": {
+                "Update_a_Task_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "ad35de2a-d9d9-5370-9eec-18006f52aea0"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                      "operationId": "UpdateTask_V3"
+                    },
+                    "parameters": {
+                      "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket')?['body/id']",
+                      "body/bucketId": "iTd4wOa9Gk-rraBOzsdccJgAIhjK"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "less": [
+                  "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket')?['body/startDateTime']",
+                  "@addDays(utcNow(), -60)"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "f2c9ac66-5523-5e09-ad28-b640f72beba2"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Filter_Array_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d2849daa-8931-56ad-b392-317772aa0de3"
+          },
+          "type": "Foreach"
+        },
+        "Filter_Array_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket": {
+          "runAfter": {
+            "Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "7898cd3d-f28b-5dff-a8aa-4b8b531c73f7"
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_CRM_Project_Quotes_Planner')?['body/value']",
+            "where": "@equals(item()?['bucketId'], 'iTd4wOa9Gk-rraBOzsdccJgAIhjK')"
+          }
+        },
+        "Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket": {
+          "foreach": "@body('Filter_Array_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket')",
+          "actions": {
+            "Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "6c1eb336-a1d7-5a07-a781-8b19ad77f2b7"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                  "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                  "operationId": "GetTask_V2"
+                },
+                "parameters": {
+                  "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket')?['id']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Condition_-_Quote_Age_Over_90_Days_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket": {
+              "actions": {
+                "Update_a_Task_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket": {
+                  "runAfter": {},
+                  "metadata": {
+                    "operationMetadataId": "e25677dc-5dbd-55a6-a51e-5c91abe6fcca"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+                      "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+                      "operationId": "UpdateTask_V3"
+                    },
+                    "parameters": {
+                      "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket')?['body/id']",
+                      "body/bucketId": "qA2LftY32EGGeRVkxGdolJgAFvEr"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket": [
+                  "Succeeded"
+                ]
+              },
+              "expression": {
+                "less": [
+                  "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket')?['body/startDateTime']",
+                  "@addDays(utcNow(), -90)"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "92af24a9-415b-5958-b33c-94549eaa2968"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Filter_Array_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3f4fd3d2-8e96-5d2a-af8e-07611897419d"
+          },
+          "type": "Foreach"
+        }
+      }
+    },
+    "connectionReferences": {
+      "shared_planner": {
+        "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_planner",
+        "tier": "NotSpecified",
+        "apiName": "planner",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      }
+    },
+    "flowFailureAlertSubscribed": false,
+    "isManaged": false
+  }
+}
