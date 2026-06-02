@@ -70,8 +70,7 @@
             "parameters": {
               "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
               "id": "RFTf3QT3DkiAD6Hp-YqycpgAHw_2"
-            },
-            "authentication": "@parameters('$authentication')"
+            }
           }
         },
         "Filter_Array_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": {
@@ -106,8 +105,7 @@
                 },
                 "parameters": {
                   "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket')?['id']"
-                },
-                "authentication": "@parameters('$authentication')"
+                }
               }
             },
             "Condition_-_Quote_Age_Over_14_Days_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": {
@@ -127,8 +125,7 @@
                     "parameters": {
                       "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket')?['body/id']",
                       "body/bucketId": "WkRv-MjVzEeUPflyQgsX6pgAFkbs"
-                    },
-                    "authentication": "@parameters('$authentication')"
+                    }
                   }
                 }
               },
@@ -191,8 +188,7 @@
                 },
                 "parameters": {
                   "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket')?['id']"
-                },
-                "authentication": "@parameters('$authentication')"
+                }
               }
             },
             "Condition_-_Quote_Age_Over_30_Days_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": {
@@ -212,8 +208,7 @@
                     "parameters": {
                       "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket')?['body/id']",
                       "body/bucketId": "XNUKh98aTEKqFUyPRvShpJgAEpm6"
-                    },
-                    "authentication": "@parameters('$authentication')"
+                    }
                   }
                 }
               },
@@ -276,8 +271,7 @@
                 },
                 "parameters": {
                   "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket')?['id']"
-                },
-                "authentication": "@parameters('$authentication')"
+                }
               }
             },
             "Condition_-_Quote_Age_Over_60_Days_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": {
@@ -297,8 +291,7 @@
                     "parameters": {
                       "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket')?['body/id']",
                       "body/bucketId": "iTd4wOa9Gk-rraBOzsdccJgAIhjK"
-                    },
-                    "authentication": "@parameters('$authentication')"
+                    }
                   }
                 }
               },
@@ -361,8 +354,7 @@
                 },
                 "parameters": {
                   "id": "@items('Apply_to_Each_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket')?['id']"
-                },
-                "authentication": "@parameters('$authentication')"
+                }
               }
             },
             "Condition_-_Quote_Age_Over_90_Days_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket": {
@@ -382,8 +374,7 @@
                     "parameters": {
                       "id": "@outputs('Get_a_Task_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket')?['body/id']",
                       "body/bucketId": "qA2LftY32EGGeRVkxGdolJgAFvEr"
-                    },
-                    "authentication": "@parameters('$authentication')"
+                    }
                   }
                 }
               },
