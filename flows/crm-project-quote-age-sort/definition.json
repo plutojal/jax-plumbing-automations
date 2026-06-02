@@ -110,7 +110,7 @@
                 "authentication": "@parameters('$authentication')"
               }
             },
-            "Condition_-_Quote_Age_Over_14_Days_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": {
+            "Condition_-_Age_Over_14_Days_-_Quotes_Sent_Bucket": {
               "actions": {
                 "Update_a_Task_-_CRM_Project_Quotes_Planner_-_Quotes_Sent_Bucket": {
                   "runAfter": {},
@@ -195,7 +195,7 @@
                 "authentication": "@parameters('$authentication')"
               }
             },
-            "Condition_-_Quote_Age_Over_30_Days_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": {
+            "Condition_-_Age_Over_30_Days_-_Over_14_Days_Bucket": {
               "actions": {
                 "Update_a_Task_-_CRM_Project_Quotes_Planner_-_Over_14_Days_Bucket": {
                   "runAfter": {},
@@ -280,7 +280,7 @@
                 "authentication": "@parameters('$authentication')"
               }
             },
-            "Condition_-_Quote_Age_Over_60_Days_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": {
+            "Condition_-_Age_Over_60_Days_-_Over_30_Days_Bucket": {
               "actions": {
                 "Update_a_Task_-_CRM_Project_Quotes_Planner_-_Over_30_Days_Bucket": {
                   "runAfter": {},
@@ -365,7 +365,7 @@
                 "authentication": "@parameters('$authentication')"
               }
             },
-            "Condition_-_Quote_Age_Over_90_Days_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket": {
+            "Condition_-_Age_Over_90_Days_-_Over_60_Days_Bucket": {
               "actions": {
                 "Update_a_Task_-_CRM_Project_Quotes_Planner_-_Over_60_Days_Bucket": {
                   "runAfter": {},
