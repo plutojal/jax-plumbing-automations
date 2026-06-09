@@ -1,0 +1,204 @@
+{
+  "name": "aabf447c-dc09-412d-8501-c552b00f9b38",
+  "id": "/providers/Microsoft.Flow/flows/aabf447c-dc09-412d-8501-c552b00f9b38",
+  "type": "Microsoft.Flow/flows",
+  "properties": {
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "Button",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "required": []
+            }
+          }
+        }
+      },
+      "actions": {
+        "Initialize_Variable_-_Results": {
+          "runAfter": {},
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Results",
+                "type": "array",
+                "value": []
+              }
+            ]
+          }
+        },
+        "Get_Items_-_Appliances_Oil_LPG": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetItems"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live",
+              "table": "Appliances",
+              "$filter": "Fuel_x0020_Type eq 'Oil' or Fuel_x0020_Type eq 'LPG'"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Initialize_Variable_-_Results": [
+              "Succeeded"
+            ]
+          },
+          "runtimeConfiguration": {
+            "paginationPolicy": {
+              "minimumItemCount": 5000
+            }
+          }
+        },
+        "Apply_to_Each_-_Appliance": {
+          "runAfter": {
+            "Get_Items_-_Appliances_Oil_LPG": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach",
+          "inputs": {
+            "value": "@outputs('Get_Items_-_Appliances_Oil_LPG')?['body/value']"
+          },
+          "actions": {
+            "Get_Item_-_Customer": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "GetItem"
+                },
+                "parameters": {
+                  "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live",
+                  "table": "Customers",
+                  "id": "@{items('Apply_to_Each_-_Appliance')?['CustomerId']}"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {}
+            },
+            "Get_Item_-_Job_Address": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "GetItem"
+                },
+                "parameters": {
+                  "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live",
+                  "table": "Job Addresses",
+                  "id": "@{items('Apply_to_Each_-_Appliance')?['Job_x0020_AddressId']}"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runAfter": {}
+            },
+            "Append_to_Array_-_Results": {
+              "runAfter": {
+                "Get_Item_-_Customer": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ],
+                "Get_Item_-_Job_Address": [
+                  "Succeeded",
+                  "Failed",
+                  "Skipped",
+                  "TimedOut"
+                ]
+              },
+              "type": "AppendToArrayVariable",
+              "inputs": {
+                "name": "Results",
+                "value": {
+                  "Appliance Title": "@{items('Apply_to_Each_-_Appliance')?['Title']}",
+                  "Appliance Type": "@{items('Apply_to_Each_-_Appliance')?['Appliance_x0020_Type']}",
+                  "Fuel Type": "@{items('Apply_to_Each_-_Appliance')?['Fuel_x0020_Type']}",
+                  "Customer Name": "@{items('Apply_to_Each_-_Appliance')?['Customer']}",
+                  "Job Address": "@{items('Apply_to_Each_-_Appliance')?['Job_x0020_Address']}",
+                  "Customer Landline": "@{coalesce(body('Get_Item_-_Customer')?['Landline'], '')}",
+                  "Customer Mobile": "@{coalesce(body('Get_Item_-_Customer')?['Mobile'], '')}",
+                  "Customer Email": "@{coalesce(body('Get_Item_-_Customer')?['Email'], '')}",
+                  "Job Address Email": "@{coalesce(body('Get_Item_-_Job_Address')?['Email'], '')}",
+                  "Install Name": "@{coalesce(body('Get_Item_-_Job_Address')?['Install_x0020_Name'], '')}",
+                  "Install Phone": "@{coalesce(body('Get_Item_-_Job_Address')?['Install_x0020_Phone'], '')}"
+                }
+              }
+            }
+          }
+        },
+        "Create_CSV_-_Results": {
+          "runAfter": {
+            "Apply_to_Each_-_Appliance": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@variables('Results')",
+            "format": "CSV"
+          }
+        },
+        "Create_File_-_Oil_LPG_Contacts": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live",
+              "folderPath": "/Shared Documents/Data Exports",
+              "name": "@concat('oil_lpg_contacts_', formatDateTime(utcNow(), 'yyyy-MM-dd'), '.csv')",
+              "body": "@body('Create_CSV_-_Results')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Create_CSV_-_Results": [
+              "Succeeded"
+            ]
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          }
+        }
+      }
+    },
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "connectionName": "4144a835cec941aba09a9f666e33d99a",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+        "tier": "NotSpecified",
+        "apiName": "sharepointonline",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      }
+    }
+  }
+}
