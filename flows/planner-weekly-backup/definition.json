@@ -1,0 +1,1143 @@
+{
+  "name": "8e59358e-721d-49ca-9fc3-f51bf7fb4dbf",
+  "id": "/providers/Microsoft.Flow/flows/8e59358e-721d-49ca-9fc3-f51bf7fb4dbf",
+  "type": "Microsoft.Flow/flows",
+  "properties": {
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Week",
+            "interval": 1,
+            "startTime": "2026-03-05T03:00:00.000Z",
+            "schedule": {
+              "weekDays": [
+                "Saturday"
+              ]
+            }
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Week",
+            "interval": 1,
+            "startTime": "2026-03-05T03:00:00.000Z",
+            "schedule": {
+              "weekDays": [
+                "Saturday"
+              ]
+            }
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "Initialize_Variable_-_BackupDate": {
+          "runAfter": {},
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "BackupDate",
+                "type": "string",
+                "value": "@{formatDateTime(utcNow(), 'yyyy-MM-dd')}"
+              }
+            ]
+          }
+        },
+        "List_Buckets_-_Servicing": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListBuckets_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "yD_18hw4hkmq0SWujsfFmZgAA88H"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Initialize_Variable_-_BackupDate": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Tasks_-_Servicing": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListTasks_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "yD_18hw4hkmq0SWujsfFmZgAA88H"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "List_Buckets_-_Servicing": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Select_-_Tasks_-_Servicing": {
+          "runAfter": {
+            "List_Tasks_-_Servicing": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_Servicing')?['body/value']",
+            "select": {
+              "Task Title": "@item()?['title']",
+              "Bucket ID": "@item()?['bucketId']",
+              "Start Date": "@item()?['startDateTime']",
+              "Due Date": "@item()?['dueDateTime']",
+              "Percent Complete": "@item()?['percentComplete']",
+              "Created Date": "@item()?['createdDateTime']"
+            }
+          }
+        },
+        "Select_-_Buckets_-_Servicing": {
+          "runAfter": {
+            "Select_-_Tasks_-_Servicing": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Buckets_-_Servicing')?['body/value']",
+            "select": {
+              "Bucket ID": "@item()?['id']",
+              "Bucket Name": "@item()?['name']"
+            }
+          }
+        },
+        "Create_CSV_-_Tasks_-_Servicing": {
+          "runAfter": {
+            "Select_-_Buckets_-_Servicing": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Tasks_-_Servicing')",
+            "format": "CSV"
+          }
+        },
+        "Create_CSV_-_Buckets_-_Servicing": {
+          "runAfter": {
+            "Create_CSV_-_Tasks_-_Servicing": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Buckets_-_Servicing')",
+            "format": "CSV"
+          }
+        },
+        "Create_File_-_Tasks_-_Servicing": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Servicing",
+              "name": "@concat('planner_backup_servicing_', variables('BackupDate'), '.csv')",
+              "body": "@body('Create_CSV_-_Tasks_-_Servicing')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_CSV_-_Buckets_-_Servicing": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Create_File_-_Buckets_-_Servicing": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Servicing",
+              "name": "@concat('planner_backup_servicing_', variables('BackupDate'), '_buckets.csv')",
+              "body": "@body('Create_CSV_-_Buckets_-_Servicing')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_File_-_Tasks_-_Servicing": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Buckets_-_Quoted_Works": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListBuckets_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "MwV9RfoPLkybHdFwh99yRpgADla_"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Initialize_Variable_-_BackupDate": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Tasks_-_Quoted_Works": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListTasks_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "MwV9RfoPLkybHdFwh99yRpgADla_"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "List_Buckets_-_Quoted_Works": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Select_-_Tasks_-_Quoted_Works": {
+          "runAfter": {
+            "List_Tasks_-_Quoted_Works": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_Quoted_Works')?['body/value']",
+            "select": {
+              "Task Title": "@item()?['title']",
+              "Bucket ID": "@item()?['bucketId']",
+              "Start Date": "@item()?['startDateTime']",
+              "Due Date": "@item()?['dueDateTime']",
+              "Percent Complete": "@item()?['percentComplete']",
+              "Created Date": "@item()?['createdDateTime']"
+            }
+          }
+        },
+        "Select_-_Buckets_-_Quoted_Works": {
+          "runAfter": {
+            "Select_-_Tasks_-_Quoted_Works": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Buckets_-_Quoted_Works')?['body/value']",
+            "select": {
+              "Bucket ID": "@item()?['id']",
+              "Bucket Name": "@item()?['name']"
+            }
+          }
+        },
+        "Create_CSV_-_Tasks_-_Quoted_Works": {
+          "runAfter": {
+            "Select_-_Buckets_-_Quoted_Works": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Tasks_-_Quoted_Works')",
+            "format": "CSV"
+          }
+        },
+        "Create_CSV_-_Buckets_-_Quoted_Works": {
+          "runAfter": {
+            "Create_CSV_-_Tasks_-_Quoted_Works": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Buckets_-_Quoted_Works')",
+            "format": "CSV"
+          }
+        },
+        "Create_File_-_Tasks_-_Quoted_Works": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Quoted Works",
+              "name": "@concat('planner_backup_quoted_works_', variables('BackupDate'), '.csv')",
+              "body": "@body('Create_CSV_-_Tasks_-_Quoted_Works')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_CSV_-_Buckets_-_Quoted_Works": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Create_File_-_Buckets_-_Quoted_Works": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Quoted Works",
+              "name": "@concat('planner_backup_quoted_works_', variables('BackupDate'), '_buckets.csv')",
+              "body": "@body('Create_CSV_-_Buckets_-_Quoted_Works')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_File_-_Tasks_-_Quoted_Works": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Buckets_-_Quotes": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListBuckets_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "X0UloyezF0uAciITaNPmDJgACX-F"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Initialize_Variable_-_BackupDate": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Tasks_-_Quotes": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListTasks_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "X0UloyezF0uAciITaNPmDJgACX-F"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "List_Buckets_-_Quotes": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Select_-_Tasks_-_Quotes": {
+          "runAfter": {
+            "List_Tasks_-_Quotes": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_Quotes')?['body/value']",
+            "select": {
+              "Task Title": "@item()?['title']",
+              "Bucket ID": "@item()?['bucketId']",
+              "Start Date": "@item()?['startDateTime']",
+              "Due Date": "@item()?['dueDateTime']",
+              "Percent Complete": "@item()?['percentComplete']",
+              "Created Date": "@item()?['createdDateTime']"
+            }
+          }
+        },
+        "Select_-_Buckets_-_Quotes": {
+          "runAfter": {
+            "Select_-_Tasks_-_Quotes": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Buckets_-_Quotes')?['body/value']",
+            "select": {
+              "Bucket ID": "@item()?['id']",
+              "Bucket Name": "@item()?['name']"
+            }
+          }
+        },
+        "Create_CSV_-_Tasks_-_Quotes": {
+          "runAfter": {
+            "Select_-_Buckets_-_Quotes": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Tasks_-_Quotes')",
+            "format": "CSV"
+          }
+        },
+        "Create_CSV_-_Buckets_-_Quotes": {
+          "runAfter": {
+            "Create_CSV_-_Tasks_-_Quotes": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Buckets_-_Quotes')",
+            "format": "CSV"
+          }
+        },
+        "Create_File_-_Tasks_-_Quotes": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Quotes",
+              "name": "@concat('planner_backup_quotes_', variables('BackupDate'), '.csv')",
+              "body": "@body('Create_CSV_-_Tasks_-_Quotes')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_CSV_-_Buckets_-_Quotes": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Create_File_-_Buckets_-_Quotes": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Quotes",
+              "name": "@concat('planner_backup_quotes_', variables('BackupDate'), '_buckets.csv')",
+              "body": "@body('Create_CSV_-_Buckets_-_Quotes')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_File_-_Tasks_-_Quotes": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Buckets_-_Breakdown": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListBuckets_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "_BYbti8PikevwupaBYfbVZgAF8yV"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Initialize_Variable_-_BackupDate": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Tasks_-_Breakdown": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListTasks_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "_BYbti8PikevwupaBYfbVZgAF8yV"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "List_Buckets_-_Breakdown": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Select_-_Tasks_-_Breakdown": {
+          "runAfter": {
+            "List_Tasks_-_Breakdown": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_Breakdown')?['body/value']",
+            "select": {
+              "Task Title": "@item()?['title']",
+              "Bucket ID": "@item()?['bucketId']",
+              "Start Date": "@item()?['startDateTime']",
+              "Due Date": "@item()?['dueDateTime']",
+              "Percent Complete": "@item()?['percentComplete']",
+              "Created Date": "@item()?['createdDateTime']"
+            }
+          }
+        },
+        "Select_-_Buckets_-_Breakdown": {
+          "runAfter": {
+            "Select_-_Tasks_-_Breakdown": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Buckets_-_Breakdown')?['body/value']",
+            "select": {
+              "Bucket ID": "@item()?['id']",
+              "Bucket Name": "@item()?['name']"
+            }
+          }
+        },
+        "Create_CSV_-_Tasks_-_Breakdown": {
+          "runAfter": {
+            "Select_-_Buckets_-_Breakdown": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Tasks_-_Breakdown')",
+            "format": "CSV"
+          }
+        },
+        "Create_CSV_-_Buckets_-_Breakdown": {
+          "runAfter": {
+            "Create_CSV_-_Tasks_-_Breakdown": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Buckets_-_Breakdown')",
+            "format": "CSV"
+          }
+        },
+        "Create_File_-_Tasks_-_Breakdown": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Breakdown",
+              "name": "@concat('planner_backup_breakdown_', variables('BackupDate'), '.csv')",
+              "body": "@body('Create_CSV_-_Tasks_-_Breakdown')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_CSV_-_Buckets_-_Breakdown": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Create_File_-_Buckets_-_Breakdown": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Breakdown",
+              "name": "@concat('planner_backup_breakdown_', variables('BackupDate'), '_buckets.csv')",
+              "body": "@body('Create_CSV_-_Buckets_-_Breakdown')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_File_-_Tasks_-_Breakdown": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Buckets_-_General_Jobs": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListBuckets_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "EzDCv-uoaUyKFlc-IRelbpgADYCI"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Initialize_Variable_-_BackupDate": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Tasks_-_General_Jobs": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListTasks_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "EzDCv-uoaUyKFlc-IRelbpgADYCI"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "List_Buckets_-_General_Jobs": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Select_-_Tasks_-_General_Jobs": {
+          "runAfter": {
+            "List_Tasks_-_General_Jobs": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_General_Jobs')?['body/value']",
+            "select": {
+              "Task Title": "@item()?['title']",
+              "Bucket ID": "@item()?['bucketId']",
+              "Start Date": "@item()?['startDateTime']",
+              "Due Date": "@item()?['dueDateTime']",
+              "Percent Complete": "@item()?['percentComplete']",
+              "Created Date": "@item()?['createdDateTime']"
+            }
+          }
+        },
+        "Select_-_Buckets_-_General_Jobs": {
+          "runAfter": {
+            "Select_-_Tasks_-_General_Jobs": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Buckets_-_General_Jobs')?['body/value']",
+            "select": {
+              "Bucket ID": "@item()?['id']",
+              "Bucket Name": "@item()?['name']"
+            }
+          }
+        },
+        "Create_CSV_-_Tasks_-_General_Jobs": {
+          "runAfter": {
+            "Select_-_Buckets_-_General_Jobs": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Tasks_-_General_Jobs')",
+            "format": "CSV"
+          }
+        },
+        "Create_CSV_-_Buckets_-_General_Jobs": {
+          "runAfter": {
+            "Create_CSV_-_Tasks_-_General_Jobs": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Buckets_-_General_Jobs')",
+            "format": "CSV"
+          }
+        },
+        "Create_File_-_Tasks_-_General_Jobs": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/General Jobs",
+              "name": "@concat('planner_backup_general_jobs_', variables('BackupDate'), '.csv')",
+              "body": "@body('Create_CSV_-_Tasks_-_General_Jobs')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_CSV_-_Buckets_-_General_Jobs": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Create_File_-_Buckets_-_General_Jobs": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/General Jobs",
+              "name": "@concat('planner_backup_general_jobs_', variables('BackupDate'), '_buckets.csv')",
+              "body": "@body('Create_CSV_-_Buckets_-_General_Jobs')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_File_-_Tasks_-_General_Jobs": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Buckets_-_Project_Install": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListBuckets_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "xAW30scu2E26_wE6zp2a8JgAESmS"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Initialize_Variable_-_BackupDate": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Tasks_-_Project_Install": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListTasks_V3"
+            },
+            "parameters": {
+              "groupId": "f32f4bde-3d77-4bf9-bc30-ccf7ae6cff5b",
+              "id": "xAW30scu2E26_wE6zp2a8JgAESmS"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "List_Buckets_-_Project_Install": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Select_-_Tasks_-_Project_Install": {
+          "runAfter": {
+            "List_Tasks_-_Project_Install": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_Project_Install')?['body/value']",
+            "select": {
+              "Task Title": "@item()?['title']",
+              "Bucket ID": "@item()?['bucketId']",
+              "Start Date": "@item()?['startDateTime']",
+              "Due Date": "@item()?['dueDateTime']",
+              "Percent Complete": "@item()?['percentComplete']",
+              "Created Date": "@item()?['createdDateTime']"
+            }
+          }
+        },
+        "Select_-_Buckets_-_Project_Install": {
+          "runAfter": {
+            "Select_-_Tasks_-_Project_Install": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Buckets_-_Project_Install')?['body/value']",
+            "select": {
+              "Bucket ID": "@item()?['id']",
+              "Bucket Name": "@item()?['name']"
+            }
+          }
+        },
+        "Create_CSV_-_Tasks_-_Project_Install": {
+          "runAfter": {
+            "Select_-_Buckets_-_Project_Install": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Tasks_-_Project_Install')",
+            "format": "CSV"
+          }
+        },
+        "Create_CSV_-_Buckets_-_Project_Install": {
+          "runAfter": {
+            "Create_CSV_-_Tasks_-_Project_Install": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Buckets_-_Project_Install')",
+            "format": "CSV"
+          }
+        },
+        "Create_File_-_Tasks_-_Project_Install": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Project Install",
+              "name": "@concat('planner_backup_project_install_', variables('BackupDate'), '.csv')",
+              "body": "@body('Create_CSV_-_Tasks_-_Project_Install')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_CSV_-_Buckets_-_Project_Install": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Create_File_-_Buckets_-_Project_Install": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Project Install",
+              "name": "@concat('planner_backup_project_install_', variables('BackupDate'), '_buckets.csv')",
+              "body": "@body('Create_CSV_-_Buckets_-_Project_Install')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_File_-_Tasks_-_Project_Install": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Buckets_-_Project_Quotes": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListBuckets_V3"
+            },
+            "parameters": {
+              "groupId": "c3477e81-429c-465f-8e1a-865400170704",
+              "id": "RFTf3QT3DkiAD6Hp-YqycpgAHw_2"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "Initialize_Variable_-_BackupDate": [
+              "Succeeded"
+            ]
+          }
+        },
+        "List_Tasks_-_Project_Quotes": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_planner",
+              "connectionName": "shared_planner",
+              "operationId": "ListTasks_V3"
+            },
+            "parameters": {
+              "groupId": "c3477e81-429c-465f-8e1a-865400170704",
+              "id": "RFTf3QT3DkiAD6Hp-YqycpgAHw_2"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runAfter": {
+            "List_Buckets_-_Project_Quotes": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Select_-_Tasks_-_Project_Quotes": {
+          "runAfter": {
+            "List_Tasks_-_Project_Quotes": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Tasks_-_Project_Quotes')?['body/value']",
+            "select": {
+              "Task Title": "@item()?['title']",
+              "Bucket ID": "@item()?['bucketId']",
+              "Start Date": "@item()?['startDateTime']",
+              "Due Date": "@item()?['dueDateTime']",
+              "Percent Complete": "@item()?['percentComplete']",
+              "Created Date": "@item()?['createdDateTime']"
+            }
+          }
+        },
+        "Select_-_Buckets_-_Project_Quotes": {
+          "runAfter": {
+            "Select_-_Tasks_-_Project_Quotes": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('List_Buckets_-_Project_Quotes')?['body/value']",
+            "select": {
+              "Bucket ID": "@item()?['id']",
+              "Bucket Name": "@item()?['name']"
+            }
+          }
+        },
+        "Create_CSV_-_Tasks_-_Project_Quotes": {
+          "runAfter": {
+            "Select_-_Buckets_-_Project_Quotes": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Tasks_-_Project_Quotes')",
+            "format": "CSV"
+          }
+        },
+        "Create_CSV_-_Buckets_-_Project_Quotes": {
+          "runAfter": {
+            "Create_CSV_-_Tasks_-_Project_Quotes": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Select_-_Buckets_-_Project_Quotes')",
+            "format": "CSV"
+          }
+        },
+        "Create_File_-_Tasks_-_Project_Quotes": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Project Quotes",
+              "name": "@concat('planner_backup_project_quotes_', variables('BackupDate'), '.csv')",
+              "body": "@body('Create_CSV_-_Tasks_-_Project_Quotes')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_CSV_-_Buckets_-_Project_Quotes": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Create_File_-_Buckets_-_Project_Quotes": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents/Planner Backups/Project Quotes",
+              "name": "@concat('planner_backup_project_quotes_', variables('BackupDate'), '_buckets.csv')",
+              "body": "@body('Create_CSV_-_Buckets_-_Project_Quotes')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          },
+          "runAfter": {
+            "Create_File_-_Tasks_-_Project_Quotes": [
+              "Succeeded"
+            ]
+          }
+        }
+      }
+    },
+    "connectionReferences": {
+      "shared_planner": {
+        "connectionName": "shared-planner-dd517356-3981-4103-9d8a-2f091df4831f",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_planner",
+        "tier": "NotSpecified",
+        "apiName": "planner",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_sharepointonline": {
+        "connectionName": "4144a835cec941aba09a9f666e33d99a",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+        "tier": "NotSpecified",
+        "apiName": "sharepointonline",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      }
+    }
+  }
+}
