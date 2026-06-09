@@ -76,9 +76,6 @@
             ]
           },
           "type": "Foreach",
-          "inputs": {
-            "value": "@outputs('Get_Items_-_Appliances_Oil_LPG')?['body/value']"
-          },
           "actions": {
             "Get_Item_-_Customer": {
               "type": "OpenApiConnection",
@@ -147,7 +144,8 @@
                 }
               }
             }
-          }
+          },
+          "foreach": "@outputs('Get_Items_-_Appliances_Oil_LPG')?['body/value']"
         },
         "Create_CSV_-_Results": {
           "runAfter": {
