@@ -66,6 +66,21 @@ Planner backups and general documents live on **JaxPlumbing**.
 
 Never use `["Succeeded", "Failed"]` unless there is a deliberate reason to continue on failure.
 
+### Foreach (Apply to Each) action format
+
+`Foreach` uses a top-level `foreach` property, **not** `inputs`:
+
+```json
+"Apply_to_Each_-_Items": {
+  "type": "Foreach",
+  "foreach": "@outputs('Get_Items')?['body/value']",
+  "actions": { ... },
+  "runAfter": { "Get_Items": ["Succeeded"] }
+}
+```
+
+Inside the loop, reference the current item with `items('Apply_to_Each_-_Items')?['FieldName']`.
+
 ### Action name limit
 
 **80 characters maximum.** Names with spaces use underscores. Always verify with `len(name) <= 80`.
