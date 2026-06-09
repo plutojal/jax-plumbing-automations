@@ -169,7 +169,7 @@
             },
             "parameters": {
               "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
-              "folderPath": "/Shared Documents",
+              "folderPath": "/Shared Documents/DATA EXPORTS",
               "name": "@concat('oil_lpg_contacts_', formatDateTime(utcNow(), 'yyyy-MM-dd'), '.csv')",
               "body": "@body('Create_CSV_-_Results')"
             },
