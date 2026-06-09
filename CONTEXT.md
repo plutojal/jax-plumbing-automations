@@ -219,7 +219,7 @@ Company fleet. Import file: `Vehicle_List_SharePoint.xlsx`.
 | Appliance Model | Text | `Appliance_x0020_Model` | |
 | Appliance Location | Text | `Appliance_x0020_Location` | |
 | Service Due | Date/Time | `Service_x0020_Due` | |
-| Fuel Type | Choice | `Fuel_x0020_Type` ✓ | Domestic Gas, Commercial Gas, LPG, Oil, ASHP, Unvented Cylinder, Miscellaneous. Default: Domestic Gas |
+| Fuel Type | Choice | `field_8` ✓ | Domestic Gas, Commercial Gas, LPG, Oil, ASHP, Unvented Cylinder, Miscellaneous. Default: Domestic Gas. Internal name is `field_8` — column was created before display name was set. |
 | Serial Number | Text | `Serial_x0020_Number` | |
 | Gas Council Number | Text | `Gas_x0020_Council_x0020_Number` | |
 | Notes | Multi-line | `Notes` | |

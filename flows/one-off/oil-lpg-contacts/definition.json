@@ -54,7 +54,7 @@
             "parameters": {
               "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live",
               "table": "Appliances",
-              "$filter": "Fuel_x0020_Type eq 'Oil' or Fuel_x0020_Type eq 'LPG'"
+              "$filter": "field_8 eq 'Oil' or field_8 eq 'LPG'"
             },
             "authentication": "@parameters('$authentication')"
           },
@@ -168,8 +168,8 @@
               "operationId": "CreateFile"
             },
             "parameters": {
-              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live",
-              "folderPath": "/Shared Documents/Data Exports",
+              "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
+              "folderPath": "/Shared Documents",
               "name": "@concat('oil_lpg_contacts_', formatDateTime(utcNow(), 'yyyy-MM-dd'), '.csv')",
               "body": "@body('Create_CSV_-_Results')"
             },
