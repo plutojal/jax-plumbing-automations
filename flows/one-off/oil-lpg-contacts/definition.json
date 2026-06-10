@@ -88,7 +88,7 @@
                 "parameters": {
                   "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live",
                   "table": "Customers",
-                  "id": "@{items('Apply_to_Each_-_Appliance')?['CustomerId']}"
+                  "id": "@{items('Apply_to_Each_-_Appliance')?['Customer']?['Id']}"
                 },
                 "authentication": "@parameters('$authentication')"
               },
@@ -105,7 +105,7 @@
                 "parameters": {
                   "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live",
                   "table": "Job Addresses",
-                  "id": "@{items('Apply_to_Each_-_Appliance')?['Job_x0020_AddressId']}"
+                  "id": "@{items('Apply_to_Each_-_Appliance')?['Job_x0020_Address']?['Id']}"
                 },
                 "authentication": "@parameters('$authentication')"
               },
@@ -132,9 +132,9 @@
                 "value": {
                   "Appliance Title": "@{items('Apply_to_Each_-_Appliance')?['Title']}",
                   "Appliance Type": "@{items('Apply_to_Each_-_Appliance')?['Appliance_x0020_Type']}",
-                  "Fuel Type": "@{items('Apply_to_Each_-_Appliance')?['Fuel_x0020_Type']}",
-                  "Customer Name": "@{items('Apply_to_Each_-_Appliance')?['Customer']}",
-                  "Job Address": "@{items('Apply_to_Each_-_Appliance')?['Job_x0020_Address']}",
+                  "Fuel Type": "@{items('Apply_to_Each_-_Appliance')?['field_8']}",
+                  "Customer Name": "@{items('Apply_to_Each_-_Appliance')?['Customer']?['Value']}",
+                  "Job Address": "@{items('Apply_to_Each_-_Appliance')?['Job_x0020_Address']?['Value']}",
                   "Customer Landline": "@{coalesce(body('Get_Item_-_Customer')?['Landline'], '')}",
                   "Customer Mobile": "@{coalesce(body('Get_Item_-_Customer')?['Mobile'], '')}",
                   "Customer Email": "@{coalesce(body('Get_Item_-_Customer')?['Email'], '')}",
@@ -169,7 +169,7 @@
             },
             "parameters": {
               "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbing",
-              "folderPath": "/Documents/DATA EXPORTS",
+              "folderPath": "/Shared Documents/DATA EXPORTS",
               "name": "@concat('oil_lpg_contacts_', formatDateTime(utcNow(), 'yyyy-MM-dd'), '.csv')",
               "body": "@body('Create_CSV_-_Results')"
             },

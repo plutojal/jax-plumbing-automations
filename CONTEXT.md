@@ -132,6 +132,10 @@ Company fleet. Import file: `Vehicle_List_SharePoint.xlsx`.
 ## SharePoint lists — JaxPlumbingCRMHub-Live site
 
 > Internal column names follow the SharePoint URL-encoding convention: spaces → `_x0020_`, slash `/` → `_x002F_`. Single-word column names keep their display name as the internal name. Where a column has been verified working in a flow expression, it is marked ✓.
+>
+> **Lookup columns** return a full OData object, not a plain string. Always use `?['ColumnName']?['Value']` for the display text and `?['ColumnName']?['Id']` for the numeric ID (e.g. for Get Item calls). Do NOT use `?['ColumnNameId']` — that flat key does not exist in GetItems responses.
+>
+> **Columns created before their display name was set** may have internal names like `field_8` instead of the expected `Field_x0020_Name` pattern. Check by clicking the column in List Settings and reading the `Field=` parameter from the URL.
 
 ### 5. Customers
 
