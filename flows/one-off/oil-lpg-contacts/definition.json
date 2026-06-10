@@ -105,7 +105,7 @@
                 "parameters": {
                   "dataset": "https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live",
                   "table": "Job Addresses",
-                  "id": "@{items('Apply_to_Each_-_Appliance')?['Job_x0020_Address']?['Id']}"
+                  "id": "@{items('Apply_to_Each_-_Appliance')?['JobAddress']?['Id']}"
                 },
                 "authentication": "@parameters('$authentication')"
               },
@@ -131,16 +131,16 @@
                 "name": "Results",
                 "value": {
                   "Appliance Title": "@{items('Apply_to_Each_-_Appliance')?['Title']}",
-                  "Appliance Type": "@{items('Apply_to_Each_-_Appliance')?['Appliance_x0020_Type']}",
+                  "Appliance Type": "@{items('Apply_to_Each_-_Appliance')?['field_3']}",
                   "Fuel Type": "@{items('Apply_to_Each_-_Appliance')?['field_8']}",
                   "Customer Name": "@{items('Apply_to_Each_-_Appliance')?['Customer']?['Value']}",
-                  "Job Address": "@{items('Apply_to_Each_-_Appliance')?['Job_x0020_Address']?['Value']}",
-                  "Customer Landline": "@{coalesce(body('Get_Item_-_Customer')?['Landline'], '')}",
-                  "Customer Mobile": "@{coalesce(body('Get_Item_-_Customer')?['Mobile'], '')}",
-                  "Customer Email": "@{coalesce(body('Get_Item_-_Customer')?['Email'], '')}",
-                  "Job Address Email": "@{coalesce(body('Get_Item_-_Job_Address')?['Email'], '')}",
-                  "Install Name": "@{coalesce(body('Get_Item_-_Job_Address')?['Install_x0020_Name'], '')}",
-                  "Install Phone": "@{coalesce(body('Get_Item_-_Job_Address')?['Install_x0020_Phone'], '')}"
+                  "Job Address": "@{items('Apply_to_Each_-_Appliance')?['JobAddress']?['Value']}",
+                  "Customer Landline": "@{coalesce(body('Get_Item_-_Customer')?['field_14'], '')}",
+                  "Customer Mobile": "@{coalesce(body('Get_Item_-_Customer')?['field_15'], '')}",
+                  "Customer Email": "@{coalesce(body('Get_Item_-_Customer')?['field_16'], '')}",
+                  "Job Address Email": "@{coalesce(body('Get_Item_-_Job_Address')?['field_9'],  '')}",
+                  "Install Name": "@{coalesce(body('Get_Item_-_Job_Address')?['field_11'], '')}",
+                  "Install Phone": "@{coalesce(body('Get_Item_-_Job_Address')?['field_12'], '')}"
                 }
               }
             }

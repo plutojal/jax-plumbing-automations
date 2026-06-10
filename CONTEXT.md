@@ -131,103 +131,126 @@ Company fleet. Import file: `Vehicle_List_SharePoint.xlsx`.
 
 ## SharePoint lists — JaxPlumbingCRMHub-Live site
 
-> Internal column names follow the SharePoint URL-encoding convention: spaces → `_x0020_`, slash `/` → `_x002F_`. Single-word column names keep their display name as the internal name. Where a column has been verified working in a flow expression, it is marked ✓.
+Base URL: `https://jaxplumbinggy.sharepoint.com/sites/JaxPlumbingCRMHub-Live`
+
+> **All columns on these lists were renamed after creation — their internal names are `field_N`, not display-name-based.** Use the internal field names below for all REST API calls, OData filters, and Power Automate expressions.
 >
-> **Lookup columns** return a full OData object, not a plain string. Always use `?['ColumnName']?['Value']` for the display text and `?['ColumnName']?['Id']` for the numeric ID (e.g. for Get Item calls). Do NOT use `?['ColumnNameId']` — that flat key does not exist in GetItems responses.
+> **Lookup columns** return a full OData object in GetItems responses. Use `?['ColumnName']?['Value']` for display text and `?['ColumnName']?['Id']` for the numeric ID (e.g. for Get Item calls). Do NOT use `?['ColumnNameId']` — that flat key does not exist.
 >
-> **Columns created before their display name was set** may have internal names like `field_8` instead of the expected `Field_x0020_Name` pattern. Check by clicking the column in List Settings and reading the `Field=` parameter from the URL.
-
-### 5. Customers
-
-**List URL name:** `Customer` (display name is "Customers")
-
-| Display Name | Type | Internal Name | Notes |
-|---|---|---|---|
-| Title | Text | `Title` | Customer reference |
-| Status | Choice | `Status` | |
-| Full Name | Text | `Full_x0020_Name` | |
-| Honorific | Text | `Honorific` | |
-| Honorific Title | Choice | `Honorific_x0020_Title` | |
-| First Name | Text | `First_x0020_Name` | |
-| Last Name | Text | `Last_x0020_Name` | |
-| Company Name | Text | `Company_x0020_Name` | |
-| Full Address | Text | `Full_x0020_Address` | |
-| Building/House Number | Text | `Building_x002F_House_x0020_Number` | |
-| Street Address | Text | `Street_x0020_Address` | |
-| Town/City | Text | `Town_x002F_City` | |
-| Region/County | Text | `Region_x002F_County` | |
-| Postcode | Text | `Postcode` | |
-| Landline | Text | `Landline` | ✓ used in oil-lpg-contacts |
-| Mobile | Text | `Mobile` | ✓ used in oil-lpg-contacts |
-| Email | Text | `Email` | ✓ used in oil-lpg-contacts |
-| 2nd Email | Text | `_x0032_nd_x0020_Email` | Leading digit encoded |
-| Notes | Multi-line | `Notes` | |
-| Reminders Enabled | Yes/No | `Reminders_x0020_Enabled` | |
-| On Stop | Yes/No | `On_x0020_Stop` | |
-| Archive | Yes/No | `Archive` | |
-| SMS Reminders Enabled | Yes/No | `SMS_x0020_Reminders_x0020_Enabled` | |
-| Email Reminders Enabled | Yes/No | `Email_x0020_Reminders_x0020_Enabled` | |
-| SMS Marketing Enabled | Yes/No | `SMS_x0020_Marketing_x0020_Enabled` | |
-| Email Marketing Enabled | Yes/No | `Email_x0020_Marketing_x0020_Enabled` | |
-| SMS Transactional Enabled | Yes/No | `SMS_x0020_Transactional_x0020_Enabled` | |
-| Email Transactional Enabled | Yes/No | `Email_x0020_Transactional_x0020_Enabled` | |
-| SMS Servicing Enabled | Yes/No | `SMS_x0020_Servicing_x0020_Enabled` | |
-| Email Servicing Enabled | Yes/No | `Email_x0020_Servicing_x0020_Enabled` | |
+> **MultiChoice fields** (`field_2` Status on Customers and Job Addresses) return `{ results: ["Active"] }` — access with `?['field_2']?['results']`.
 
 ---
 
-### 6. Job Addresses
+### 5. Appliances
 
-**List URL name:** `Job Addresses`
+**List title (REST):** `Appliances` | **URL:** `/Lists/Appliances/AllItems.aspx`
+~4,489 items — index any column used in OData filters.
 
-| Display Name | Type | Internal Name | Notes |
+| Display Name | Internal Name | Type | Notes |
 |---|---|---|---|
-| Title | Text | `Title` | Address reference |
-| Status | Choice | `Status` | |
-| Full Address | Text | `Full_x0020_Address` | |
-| Building/House Number | Text | `Building_x002F_House_x0020_Number` | |
-| Street Address | Text | `Street_x0020_Address` | |
-| Town/City | Text | `Town_x002F_City` | |
-| Region/County | Text | `Region_x002F_County` | |
-| Postcode | Text | `Postcode` | |
-| Email | Text | `Email` | ✓ used in oil-lpg-contacts |
-| Access Notes | Multi-line | `Access_x0020_Notes` | |
-| Install Name | Text | `Install_x0020_Name` | ✓ used in oil-lpg-contacts |
-| Install Phone | Text | `Install_x0020_Phone` | ✓ used in oil-lpg-contacts |
-| Service Due | Date/Time | `Service_x0020_Due` | |
-| Scheduling Notes | Multi-line | `Scheduling_x0020_Notes` | |
-| Customer | Lookup → Customers | `Customer` / `CustomerId` | |
-| Archive | Yes/No | `Archive` | |
-| Priority | Choice | `Priority` | |
-| ID Val | Number | `ID_x0020_Val` | |
-| SMS Reminders Enabled | Yes/No | `SMS_x0020_Reminders_x0020_Enabled` | |
-| Email Reminders Enabled | Yes/No | `Email_x0020_Reminders_x0020_Enabled` | |
-| SMS Marketing Enabled | Yes/No | `SMS_x0020_Marketing_x0020_Enabled` | |
-| Email Marketing Enabled | Yes/No | `Email_x0020_Marketing_x0020_Enabled` | |
-| SMS Transactional Enabled | Yes/No | `SMS_x0020_Transactional_x0020_Enabled` | |
-| Email Transactional Enabled | Yes/No | `Email_x0020_Transactional_x0020_Enabled` | |
-| SMS Servicing Enabled | Yes/No | `SMS_x0020_Servicing_x0020_Enabled` | |
-| Email Servicing Enabled | Yes/No | `Email_x0020_Servicing_x0020_Enabled` | |
+| Title | `Title` | Text | Appliance identifier |
+| Appliance Type | `field_3` | Text | |
+| Appliance Make | `field_4` | Text | |
+| Appliance Model | `field_5` | Text | |
+| Appliance Location | `field_6` | Text | |
+| Service Due | `field_7` | DateTime | |
+| Fuel Type | `field_8` | Choice | Domestic Gas, Commercial Gas, LPG, Oil, ASHP, Unvented Cylinder, Miscellaneous |
+| Serial Number | `field_9` | Text | |
+| Gas Council Number | `field_10` | Text | |
+| Notes | `field_11` | Multi-line | |
+| Scheduling Notes | `field_12` | Multi-line | |
+| Status | `field_13` | Choice | |
+| Customer | `Customer` / `CustomerId` | Lookup → Customers | Use `?['Customer']?['Id']` and `?['Customer']?['Value']` in expressions |
+| Job Address | `JobAddress` / `JobAddressId` | Lookup → Job Addresses | Use `?['JobAddress']?['Id']` and `?['JobAddress']?['Value']` in expressions |
+| Archive | `Archive` | Boolean | |
+| Service Interval Months | `ServiceIntervalMonths` | Choice | |
+| ID Val | `IDVal` | Number | |
+| Modified | `Modified` | DateTime | System |
+| Created | `Created` | DateTime | System |
+| Created By | `Author` | User | System |
+| Modified By | `Editor` | User | System |
 
 ---
 
-### 7. Appliances
+### 6. Customers
 
-**List URL name:** `Appliances` — ~4,489 items (approaching 5,000 threshold — index filtered columns)
+**List title (REST):** `Customers` | **URL:** `/Lists/Customer/AllItems.aspx`
 
-| Display Name | Type | Internal Name | Notes |
+| Display Name | Internal Name | Type | Notes |
 |---|---|---|---|
-| Title | Text | `Title` | Appliance identifier |
-| Appliance Type | Text | `Appliance_x0020_Type` | |
-| Appliance Make | Text | `Appliance_x0020_Make` | |
-| Appliance Model | Text | `Appliance_x0020_Model` | |
-| Appliance Location | Text | `Appliance_x0020_Location` | |
-| Service Due | Date/Time | `Service_x0020_Due` | |
-| Fuel Type | Choice | `field_8` ✓ | Domestic Gas, Commercial Gas, LPG, Oil, ASHP, Unvented Cylinder, Miscellaneous. Default: Domestic Gas. Internal name is `field_8` — column was created before display name was set. |
-| Serial Number | Text | `Serial_x0020_Number` | |
-| Gas Council Number | Text | `Gas_x0020_Council_x0020_Number` | |
-| Notes | Multi-line | `Notes` | |
-| Scheduling Notes | Multi-line | `Scheduling_x0020_Notes` | |
+| Title | `Title` | Text | Unique customer reference |
+| Status | `field_2` | MultiChoice | Returns `{ results: [...] }` |
+| Full Name | `field_3` | Text | |
+| Honorific | `field_4` | Text | Free-text prefix |
+| First Name | `field_5` | Text | |
+| Last Name | `field_6` | Text | |
+| Company Name | `field_7` | Text | |
+| Full Address | `field_8` | Text | Concatenated |
+| Building/House Number | `field_9` | Text | |
+| Street Address | `field_10` | Text | |
+| Town/City | `field_11` | Text | |
+| Region/County | `field_12` | Text | |
+| Postcode | `field_13` | Text | |
+| Landline | `field_14` | Text | |
+| Mobile | `field_15` | Text | |
+| Email | `field_16` | Text | Primary email |
+| 2nd Email | `field_17` | Text | Secondary email |
+| Notes | `field_18` | Multi-line | |
+| Reminders Enabled | `field_19` | Boolean | |
+| On Stop | `OnStop` | Boolean | |
+| Archive | `Archive` | Boolean | |
+| SMS Reminders Enabled | `SMSRemindersEnabled` | Boolean | |
+| Email Reminders Enabled | `EmailRemindersEnabled` | Boolean | |
+| Honorific Title | `HonorificTitle` | Choice | |
+| SMS Marketing Enabled | `SMSMarketingEnabled` | Boolean | |
+| Email Marketing Enabled | `EmailMarketingEnabled` | Boolean | |
+| SMS Transactional Enabled | `SMSTransactionalEnabled` | Boolean | |
+| Email Transactional Enabled | `EmailTransactionalEnabled` | Boolean | |
+| SMS Servicing Enabled | `SMSServicingEnabled` | Boolean | |
+| Email Servicing Enabled | `EmailServicingEnabled` | Boolean | |
+| Modified | `Modified` | DateTime | System |
+| Created | `Created` | DateTime | System |
+| Created By | `Author` | User | System |
+| Modified By | `Editor` | User | System |
+
+---
+
+### 7. Job Addresses
+
+**List title (REST):** `Job Addresses` | **URL:** `/Lists/Job Addresses/AllItems.aspx`
+
+| Display Name | Internal Name | Type | Notes |
+|---|---|---|---|
+| Title | `Title` | Text | Unique address reference |
+| Status | `field_2` | MultiChoice | Returns `{ results: [...] }` |
+| Full Address | `field_3` | Text | Concatenated |
+| Building/House Number | `field_4` | Text | |
+| Street Address | `field_5` | Text | |
+| Town/City | `field_6` | Text | |
+| Region/County | `field_7` | Text | |
+| Postcode | `field_8` | Text | |
+| Email | `field_9` | Text | Address-specific email |
+| Access Notes | `field_10` | Multi-line | |
+| Install Name | `field_11` | Text | Contact name at property |
+| Install Phone | `field_12` | Text | Contact phone at property |
+| Service Due | `field_13` | DateTime | field_14 is deleted/unused |
+| Scheduling Notes | `field_15` | Multi-line | |
+| Customer | `Customer` / `CustomerId` | Lookup → Customers | |
+| Archive | `Archive` | Boolean | |
+| Priority | `Priority` | Choice | |
+| ID Val | `IDVal` | Number | |
+| SMS Reminders Enabled | `SMSRemindersEnabled` | Boolean | |
+| Email Reminders Enabled | `EmailRemindersEnabled` | Boolean | |
+| SMS Marketing Enabled | `SMSMarketingEnabled` | Boolean | |
+| Email Marketing Enabled | `EmailMarketingEnabled` | Boolean | |
+| SMS Transactional Enabled | `SMSTransactionalEnabled` | Boolean | |
+| Email Transactional Enabled | `EmailTransactionalEnabled` | Boolean | |
+| SMS Servicing Enabled | `SMSServicingEnabled` | Boolean | |
+| Email Servicing Enabled | `EmailServicingEnabled` | Boolean | |
+| Modified | `Modified` | DateTime | System |
+| Created | `Created` | DateTime | System |
+| Created By | `Author` | User | System |
+| Modified By | `Editor` | User | System |
 | Status | Choice | `Status` | |
 | Customer | Lookup → Customers | `Customer` / `CustomerId` | ✓ |
 | Job Address | Lookup → Job Addresses | `Job_x0020_Address` / `Job_x0020_AddressId` | ✓ |
